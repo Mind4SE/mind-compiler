@@ -31,6 +31,7 @@ import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -49,7 +50,8 @@ public class TestDefinitionReferenceResolver {
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
     final Injector injector = Guice.createInjector(new CommonFrontendModule(),
-        new PluginLoaderModule(), new AbstractADLFrontendModule() {
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new AbstractADLFrontendModule() {
 
           protected void configureTest() {
             bind(Loader.class).toChainStartingWith(ErrorLoader.class)
