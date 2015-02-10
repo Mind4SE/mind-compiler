@@ -26,17 +26,26 @@ import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
 
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.merger.MergeException;
 import org.ow2.mind.adl.ast.Binding;
+import org.ow2.mind.adl.ast.MindInterface;
+import org.ow2.mind.idl.IDLLoader;
+import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.st.STNodeMergerImpl;
+
+import com.google.inject.Inject;
 
 /**
  * Node merger component that implements the node merging algorithm that
  * respects the STCF ADL language.
  */
 public class STCFNodeMerger extends STNodeMergerImpl {
+
+  @Inject
+  protected IDLLoader idlLoader;
 
   @Override
   protected void computeInhertedSubNodeMergeInfos(final Node inheritedSubNode,
@@ -68,10 +77,51 @@ public class STCFNodeMerger extends STNodeMergerImpl {
       super.computeSubNodeMergeInfos(subNode, parentInfo, subNodeType, infos);
 
     } else if (subNodeType.equals("interface")) {
-      // interface elements can't be merge, this is considered as an error
-      throw new InvalidMergeException(
-          ADLErrors.INVALID_INTERFACE_NAME_OVERRIDE_INHERITED_INTERFACE,
-          subNode, new NodeErrorLocator(inheritedSubNode));
+
+      final MindInterface subItf = (MindInterface) subNode;
+      final MindInterface inheritedSubItf = (MindInterface) inheritedSubNode;
+
+      final String subItfSignature = subItf.getSignature();
+      final String inheritedSubItfSignature = inheritedSubItf.getSignature();
+
+      boolean found = false;
+      InterfaceDefinition currItfDef = null;
+
+      try {
+        // no context access here: use fully qualified name in the ADL
+        final InterfaceDefinition subItfDef = (InterfaceDefinition) idlLoader
+            .load(subItfSignature, null);
+
+        /*
+         * Verify that the interface from the parent and interface from child
+         * have an inheritance relationship as well, recursively.
+         */
+        currItfDef = subItfDef;
+        while (currItfDef.getExtends() != null) {
+          if (currItfDef.getExtends().equals(inheritedSubItfSignature)) {
+            found = true;
+            break;
+          } else
+            currItfDef = (InterfaceDefinition) idlLoader.load(
+                currItfDef.getExtends(), null);
+        }
+
+        if (found)
+          super.computeSubNodeMergeInfos(subNode, parentInfo, subNodeType,
+              infos);
+        else
+          /*
+           * Non inheritance-related interface elements can't be merged, this is
+           * considered as an error.
+           */
+          throw new InvalidMergeException(
+              ADLErrors.INVALID_INTERFACE_TYPE_OVERRIDE_INHERITED_INTERFACE_NOT_COMPATIBLE,
+              subNode, new NodeErrorLocator(inheritedSubNode));
+
+      } catch (final ADLException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
     } else if (subNodeType.equals("attribute")) {
       // Attribute can be overridden, but the type cannot be changed

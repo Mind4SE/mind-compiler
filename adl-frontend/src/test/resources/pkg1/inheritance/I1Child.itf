@@ -1,0 +1,4 @@
+
+interface pkg1.inheritance.I1Child : I1 {
+  void bar();
+}

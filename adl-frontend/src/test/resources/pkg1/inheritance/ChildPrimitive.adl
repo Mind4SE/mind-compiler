@@ -1,0 +1,7 @@
+primitive pkg1.inheritance.ChildPrimitive extends ParentPrimitive {
+  
+  // Overrides ParentPrimitive "provides I1 as itf1", where I1Child is a child type of I1
+  provides pkg1.inheritance.I1Child as itf1;
+  
+  source {{ }};
+}

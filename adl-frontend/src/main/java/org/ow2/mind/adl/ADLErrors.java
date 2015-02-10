@@ -193,6 +193,12 @@ public enum ADLErrors implements ErrorTemplate {
       "Invalid attribute type, an attribute with the same name already exist in inherited definition with a different type at %s",
       "<location>"),
 
+  /** */
+  INVALID_INTERFACE_TYPE_OVERRIDE_INHERITED_INTERFACE_NOT_COMPATIBLE(
+      57,
+      "Invalid interface override, interface type is not a child of the original instance type in inherited definition, at %s",
+      "<location>"),
+
   // ---------------------------------------------------------------------------
   // Attribute errors (60-65)
   // ---------------------------------------------------------------------------
