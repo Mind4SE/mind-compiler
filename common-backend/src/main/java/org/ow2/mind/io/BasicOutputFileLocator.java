@@ -69,15 +69,9 @@ public class BasicOutputFileLocator implements OutputFileLocator {
     return mkdirs(new File(outDir, path));
   }
 
-  public File getCExecutableOutputFile(String path,
+  public File getCExecutableOutputFile(final String path,
       final Map<Object, Object> context) {
     final File outDir = getOutputDir(context);
-
-    // ensure that executable path on Windows ends with ".exe".
-    if (System.getProperty("os.name").contains("Windows")
-        && !path.endsWith(".exe")) {
-      path = path + ".exe";
-    }
 
     return mkdirs(new File(outDir, path));
   }
